@@ -1,4 +1,4 @@
-package States 
+package  States
 {
 	import org.flixel.*;
 	
