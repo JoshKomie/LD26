@@ -29,7 +29,14 @@ package States
 			
 			createMap(1);
 			createPlayer();
+			
+			//camera wil follow player
+			FlxG.camera.follow(player);
 		}
+		
+		/*
+		 * create the tile map
+		 */
 		
 		private function createMap(levelNum:int):void
 		{
