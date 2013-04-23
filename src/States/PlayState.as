@@ -5,6 +5,8 @@ package States
 	import GameObjects.Player;
 	import org.flixel.*;
 	import Data.LevelData;
+	import GameObjects.*;
+	import Managers.*;
 	
 	/**
 	 * ...
@@ -12,24 +14,21 @@ package States
 	 */
 	public class PlayState extends FlxState
 	{
-		private var player:FlxSprite;
-		private var playerWidth:int;
-		private var playerHeight:int;
+		private var player:Player;
 		private var levelData:LevelData = new LevelData();
 		private var level:FlxTilemap;
+		private var enemyManager:EnemyManager;
 		[Embed(source="../../assets/graphics/tilemap.png")]
 		private var tileMap:Class;
-		private var flxpath:FlxPath = new FlxPath();
 		override public function create():void
 		{
 			FlxG.bgColor = 0xffaaaaaa;
-			createPlayer();
-			//var timer:Timer = new Timer(1000, 0);
-		//	timer.addEventListener(TimerEvent.TIMER, createEnemy);
-			//timer.start();
+			
+			enemyManager = new EnemyManager();
+			add(enemyManager);
 			
 			createMap(1);
-		
+			createPlayer();
 		}
 		
 		private function createMap(levelNum:int):void
@@ -43,13 +42,8 @@ package States
 					break;
 			}
 		}
-		private function createEnemy(e:TimerEvent):void
-		{
-			var enemy:FlxSprite = new FlxSprite();
-			enemy.makeGraphic(10, 10, 0xffFF0000);
-			enemy.x = Math.random() * Main.WIDTH;
-			add(enemy);
-		}
+		
+		
 		
 		/*
 		 * Set up the player
@@ -57,6 +51,7 @@ package States
 		private function createPlayer():void
 		{
 			player = new Player();
+			add(player);
 		}
 		
 		/*
@@ -64,27 +59,51 @@ package States
 		 */
 		override public function update():void
 		{
-			player.acceleration.x = player.acceleration.y = 0;
+			for (var i:int = 0; i < enemyManager.enemies.length; i++) 
+			{
+				if (player.overlaps(enemyManager.enemies[i]))
+				{
+					enemyManager.enemies[i].kill();
+				}
+			}
+		
+			FlxG.collide(level, player);
+			super.update();
+		}
+		
+		/*
+		 * moves the player
+		 */
+		/*private function movePlayer():void
+		{
+			
 				if (FlxG.keys.UP)
 				{
-					player.acceleration.y = -300;
+					player.move("up");
 				}
-				if (FlxG.keys.DOWN)
+				else if (FlxG.keys.DOWN)
 				{
-					player.acceleration.y = 300;
-					player.destroy();
+					player.move("down");
 				}
+				else
+				{
+					player.acceleration.y = 0
+				}
+				 
 				if (FlxG.keys.LEFT)
 				{
-					player.acceleration.x = -300;
+					player.move("left");
 				}
-				if (FlxG.keys.RIGHT)
+				else if (FlxG.keys.RIGHT)
 				{
-					player.acceleration.x = 300;
+					player.move("right");
 				}
-			super.update();
-			FlxG.collide(level, player);
-		}
+				else
+				{
+					player.acceleration.x = 0;
+				}
+				
+		}*/
 		
 	
 	

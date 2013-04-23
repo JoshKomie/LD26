@@ -1,28 +1,53 @@
-package GameObjects 
+package GameObjects
 {
-	import org.flixel.FlxParticle;
-	import org.flixel.FlxSprite;
+	import org.flixel.*;
 	
 	/**
 	 * ...
 	 * @author josh
 	 */
-	public class Player extends FlxSprite 
+	public class Player extends FlxSprite
 	{
-		
-		public function Player() 
+		private var power:int = 150;
+		public function Player(startx:int = 50, starty:int = 50)
 		{
 			var green:int = 0xff00FF00;
-			playerWidth = 10;
-			playerHeight = 10;
-			this = new FlxSprite(50, 50);
 			makeGraphic(10, 10, green);
-			maxVelocity.x = 300;
-			maxVelocity.y = 300;
-			drag.x = 300;
-			drag.y = 300;
+			x = startx;
+			y = starty;
 		}
 		
+		override public function update():void
+		{
+			move();
+		}
+		
+		private function move():void
+		{
+			velocity.x = 0;
+			velocity.y = 0;
+			
+			if (FlxG.keys.LEFT)
+			{
+				velocity.x = -power;
+			}
+			else if (FlxG.keys.RIGHT)
+			{
+				velocity.x = power;
+			}
+			
+			if (FlxG.keys.UP)
+			{
+				velocity.y = -power;
+			}
+			else if (FlxG.keys.DOWN)
+			{
+				velocity.y = power;
+			}
+			
+			super.update();
+		}
+	
 	}
 
 }
