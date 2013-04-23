@@ -74,8 +74,8 @@ package States
 				}
 			}
 		
-			FlxG.collide(level, player);
 			super.update();
+			FlxG.collide(level, player);
 		}
 		
 		/*
