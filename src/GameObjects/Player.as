@@ -8,13 +8,12 @@ package GameObjects
 	 */
 	public class Player extends FlxSprite
 	{
-		private var power:int = 150;
+		private var power:int = 150; //how much he moves
+		
 		[Embed(source = "../../assets/graphics/spritesheet.png")]
 		private var spriteSheet:Class;
 		public function Player(startx:int = 50, starty:int = 50)
 		{
-			//var green:int = 0xff00FF00;
-			//makeGraphic(10, 10, green);
 			loadGraphic(spriteSheet, true, false, 32, 32);
 			x = startx;
 			y = starty;
@@ -26,7 +25,6 @@ package GameObjects
 		
 		override public function update():void
 		{
-			//trace(_facing);
 			move();
 			updateAnimations();
 			super.update();
