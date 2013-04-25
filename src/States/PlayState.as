@@ -59,6 +59,8 @@ package States
 		{
 			player = new Player();
 			add(player);
+			var testObject:TestObject = new TestObject();
+			add(testObject);
 		}
 		
 		/*
@@ -66,7 +68,7 @@ package States
 		 */
 		override public function update():void
 		{
-<<<<<<< HEAD
+
 			for (var i:int = 0; i < enemyManager.enemies.length; i++) 
 			{
 				if (player.overlaps(enemyManager.enemies[i]))
@@ -75,9 +77,9 @@ package States
 				}
 			}
 		
-=======
+
 			FlxG.collide(level, player);
->>>>>>> 3.2
+
 			super.update();
 			FlxG.collide(level, player);
 		}
