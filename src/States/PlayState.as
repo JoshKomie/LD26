@@ -22,18 +22,24 @@ package States
 		private var currentLevel:int;
 		private var currentLevelArray:Array;
 		private static var TILE_SIZE:int = 30;
+		public static const DIRT:int = 0;
+		public static const DIRT_ALT:int = 1;
+		public static const GRASS:int = 2;
+		public static const WATER:int = 3;
+		public static const ROCK:int = 4;
+		public static const TREE:int = 5;
+		public static const HOUSE:int = 6;
 		override public function create():void
 		{
 			FlxG.bgColor = 0xffaaaaaa;
-			
 			currentLevel = 1;
 			createMap(currentLevel);
 			createPlayer();
-			createRandomIntArray(30, 0, 1);
 			//camera wil follow player
 			FlxG.camera.follow(player);
 			guiManager = new GuiManager(player);
 			add(guiManager);
+			 FlxG.worldBounds = new FlxRect(0, 0, 5000, 5000);
 		}
 		
 		/**
@@ -57,29 +63,46 @@ package States
 		}
 		
 		/**
-		 * add resources to the current level array by creating "pockets" of resources (currently just trees)
-		 * @param	array the array that will be changed
+		 * 
+		 * @param	type type of resource to add
+		 * @param	numberOfPockets
 		 */
-		private function addResources(array:Array):void
+		private function addResources(type:int, numberOfPockets:int):void
 		{
-			var numPockets:int = Utils.rollInt(15, 20); //15 - 20 pockets of resources
-			var pockets:Array = new Array(); //the index of where each pocket will be
-			pockets = createRandomIntArray(numPockets, 0, 5000); //randomize where the pockes are
-			
-			//create the trees
-			for (var i:int = 0; i < array.length; i++)
+			var pocketCenterPoints:Vector.<FlxPoint> = new Vector.<FlxPoint>();
+			for (var i:int = 0; i < numberOfPockets; i++) 
 			{
-				for (var j:int = 0; j < numPockets; j++)
+				pocketCenterPoints[i] = new FlxPoint();
+				pocketCenterPoints[i].x = Utils.rollInt(0, 99);
+				if (pocketCenterPoints[i].x == 50)
 				{
-					var diff:int = Math.abs(i - pockets[j]);
-					if (diff < 2)
+					pocketCenterPoints[i].x = 0;
+				}
+				if (pocketCenterPoints[i].y == 50)
+				{
+					pocketCenterPoints[i].y = 0;
+				}
+				pocketCenterPoints[i].y = Utils.rollInt(0, 49);
+				level.setTile(pocketCenterPoints[i].x, pocketCenterPoints[i].y, type);
+			}
+			
+			for (var j:int = 0; j < 100; j++) 
+			{
+				for (var k:int = 0; k < 50; k++) 
+				{
+					for (var l:int = 0; l < numberOfPockets; l++) 
 					{
-						array[i] = 3;
-						array[i + 100] = 3;
-						array[i - 100] = 3;
+						if (Math.abs(j - pocketCenterPoints[l].x) < 4 && Math.abs(k - pocketCenterPoints[l].y) < 4)
+						{
+							var roll:int = Utils.rollInt(0, Math.abs(j - pocketCenterPoints[l].x));
+							if (roll == 0)
+							{
+								level.setTile(j, k, type);
+							}
+							
+						}
 					}
 				}
-				
 			}
 		}
 		
@@ -90,8 +113,9 @@ package States
 		
 		private function createMap(levelNum:int):void
 		{
-			currentLevelArray = createRandomIntArray(5000, 0, 1)
-			addResources(currentLevelArray);
+			
+			currentLevelArray = createRandomIntArray(5000, DIRT, DIRT_ALT)
+			
 			switch (levelNum)
 			{
 				case 1:
@@ -100,6 +124,10 @@ package States
 					add(level);
 					break;
 			}
+			addResources(TREE, 30);
+			addResources(WATER, 8);
+			addResources(ROCK, 3);
+			
 		}
 		
 		/**
@@ -108,7 +136,7 @@ package States
 		private function chopTree():void
 		{
 			var center:FlxPoint = player.getMidpoint();
-			var newGround:int = Utils.rollInt(0, 1);
+			var newGround:int = Utils.rollInt(DIRT, DIRT_ALT);
 			level.setTile(center.x / TILE_SIZE, center.y / TILE_SIZE, newGround);
 			player.numLogs++;
 		}
@@ -129,13 +157,13 @@ package States
 		 */
 		override public function update():void
 		{
+			
 			getTileUnder();
-			//trace(player.isOver);
 			if (FlxG.keys.SPACE && player.isOver == 3)
 			{
 				chopTree();
 			}
-			FlxG.collide(level, player);
+			FlxG.collide(player, level);
 			super.update();
 		}
 		

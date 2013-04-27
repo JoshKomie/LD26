@@ -1,6 +1,7 @@
 package GameObjects
 {
 	import org.flixel.*;
+	import States.*;
 	
 	/**
 	 * ...
@@ -11,6 +12,7 @@ package GameObjects
 		private var power:int = 150; //how much he moves
 		public var isOver:int = 0; // what type of tile he is over
 		public var numLogs:int = 0; // number of logs he has
+		public var numStones:int = 0;
 		
 		[Embed(source = "../../assets/graphics/spritesheet.png")]
 		private var spriteSheet:Class;
@@ -25,9 +27,15 @@ package GameObjects
 		
 		override public function update():void
 		{
+			if (isOver == 3)
+			{
+				power = 60;
+			}
 			move();
+			
 			//updateAnimations();
 			super.update();
+			power = 150;
 		}
 		
 		private function move():void
@@ -78,6 +86,11 @@ package GameObjects
 			{
 				play("right");
 			}
+		}
+		
+		public function build(type:int, x:int, y:int, level:FlxTilemap):void
+		{
+			//if 
 		}
 	}
 
