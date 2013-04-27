@@ -9,24 +9,24 @@ package GameObjects
 	public class Player extends FlxSprite
 	{
 		private var power:int = 150; //how much he moves
+		public var isOver:int = 0; // what type of tile he is over
+		public var numLogs:int = 0; // number of logs he has
 		
 		[Embed(source = "../../assets/graphics/spritesheet.png")]
 		private var spriteSheet:Class;
 		public function Player(startx:int = 50, starty:int = 50)
 		{
-			loadGraphic(spriteSheet, true, false, 32, 32);
+			loadGraphic(spriteSheet, true, false, 30, 30);
 			x = startx;
 			y = starty;
-			addAnimation("up", [36, 37, 38], 5, false);
-			addAnimation("down", [0, 1, 2], 5, false);
-			addAnimation("left", [12, 13, 14], 5, false);
-			addAnimation("right", [24, 25, 26], 5, false);
+			addAnimation("normal", [0], 0, false);
+			play("normal");
 		}
 		
 		override public function update():void
 		{
 			move();
-			updateAnimations();
+			//updateAnimations();
 			super.update();
 		}
 		
