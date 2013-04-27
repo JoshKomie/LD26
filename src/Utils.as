@@ -14,7 +14,7 @@ package
 		
 		public static function deg(rad:Number):int
 		{
-			return Math.floor(rad * (180 / Math.PI));
+			return (int)(rad * (180 / Math.PI));	// Math.floor gets you a different number
 		}
 		
 		public static function distance(x1:Number, y1:Number, x2:Number, y2:Number):Number

@@ -1,17 +1,20 @@
 package States
 {
 	import flash.events.TimerEvent;
+	import flash.media.Sound;
 	import flash.utils.Timer;
 	import GameObjects.Player;
 	import org.flixel.*;
 	import Data.LevelData;
 	import GameObjects.*;
 	import Managers.*;
+	import flash.display.BlendMode;
 	
 	/**
 	 * ...
 	 * @author josh
 	 */
+	
 	public class PlayState extends FlxState
 	{
 		private var player:Player;
@@ -29,11 +32,19 @@ package States
 		public static const ROCK:int = 4;
 		public static const TREE:int = 5;
 		public static const HOUSE:int = 6;
+		[Embed(source = "../../assets/sounds/chop.mp3")]
+		private var Chop:Class;
+		private var chop:Sound;
+		
 		override public function create():void
 		{
 			FlxG.bgColor = 0xffaaaaaa;
+			
+			chop = new Chop();
+			
 			currentLevel = 1;
 			createMap(currentLevel);
+			FlxG.worldBounds = new FlxRect(0, 0, 5000, 3000);
 			createPlayer();
 			//camera wil follow player
 			FlxG.camera.follow(player);
@@ -120,7 +131,7 @@ package States
 			{
 				case 1:
 					level = new FlxTilemap();
-					level.loadMap(FlxTilemap.arrayToCSV(currentLevelArray, 100), levelData.levelOneTilemap, 30, 30, FlxTilemap.OFF, 0, 0, 4);
+					level.loadMap(FlxTilemap.arrayToCSV(currentLevelArray, 100), levelData.levelOneTilemap, TILE_SIZE, TILE_SIZE, FlxTilemap.OFF, 0, 0, 4);
 					add(level);
 					break;
 			}
@@ -135,10 +146,10 @@ package States
 		 */
 		private function chopTree():void
 		{
-			var center:FlxPoint = player.getMidpoint();
+			var center:FlxPoint = player.getFrontpoint(TILE_SIZE);
 			var newGround:int = Utils.rollInt(DIRT, DIRT_ALT);
 			level.setTile(center.x / TILE_SIZE, center.y / TILE_SIZE, newGround);
-			player.numLogs++;
+			player.numLogs += 2;
 		}
 		
 		/*
@@ -149,6 +160,8 @@ package States
 			player = new Player();
 			player.x = 1500;
 			player.y = 600;
+			player.solid = true;
+			level.solid = true;
 			add(player);
 		}
 		
@@ -164,7 +177,25 @@ package States
 				chopTree();
 			}
 			FlxG.collide(player, level);
+			//trace(player.isOver);
+			/*if (FlxG.keys.SPACE && player.isOver == 3)
+			{
+				chopTree();
+			}*/
 			super.update();
+			FlxG.collide(player, level, bump);
+		}
+		
+		private function bump(obj1:FlxObject, obj2:FlxObject):void
+		{
+			if (obj1 == player || obj2 == player)
+			{
+				if (player.mine())
+				{
+					chopTree();
+				}
+				FlxG.play(Chop);
+			}
 		}
 		
 		public function nextLevel():void
