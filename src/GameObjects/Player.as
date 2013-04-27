@@ -9,14 +9,22 @@ package GameObjects
 	public class Player extends FlxSprite
 	{
 		private var power:int = 150; //how much he moves
+		private var jumpPow:int = 100;
+		private var onGround:Boolean;
+		private var grav:int = 10;
+		private var yPrev:int;
 		
 		[Embed(source = "../../assets/graphics/spritesheet.png")]
 		private var spriteSheet:Class;
 		public function Player(startx:int = 50, starty:int = 50)
 		{
 			loadGraphic(spriteSheet, true, false, 32, 32);
+			
 			x = startx;
 			y = starty;
+			yPrev = y;
+			onGround = false;
+			
 			addAnimation("up", [36, 37, 38], 5, false);
 			addAnimation("down", [0, 1, 2], 5, false);
 			addAnimation("left", [12, 13, 14], 5, false);
@@ -26,14 +34,22 @@ package GameObjects
 		override public function update():void
 		{
 			move();
+			fall();
 			updateAnimations();
 			super.update();
+		}
+		
+		private function fall():void
+		{
+			velocity.y += grav;
+			
+			onGround = (y == yPrev); // if we collide with the ground, 
+			yPrev = y;
 		}
 		
 		private function move():void
 		{
 			velocity.x = 0;
-			velocity.y = 0;
 			
 			if (FlxG.keys.LEFT)
 			{
@@ -46,17 +62,10 @@ package GameObjects
 				facing = RIGHT;
 			}
 			
-			if (FlxG.keys.UP)
+			if (FlxG.keys.UP && onGround)
 			{
-				velocity.y = -power;
-				facing = UP;
+				velocity.y = -jumpPow;
 			}
-			else if (FlxG.keys.DOWN)
-			{
-				velocity.y = power;
-				facing = DOWN;
-			}
-			
 			
 		}
 	

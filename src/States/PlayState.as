@@ -19,11 +19,13 @@ package States
 		private var level:FlxTilemap;
 		private var enemyManager:EnemyManager;
 		private var currentLevel:int;
+		private var grav:Number;
+		
 		override public function create():void
 		{
 			FlxG.bgColor = 0xffaaaaaa;
 			
-			
+			grav = 1;
 			currentLevel = 1;
 			createMap(currentLevel);
 			createPlayer();
@@ -77,9 +79,6 @@ package States
 				}
 			}
 		
-
-			FlxG.collide(level, player);
-
 			super.update();
 			FlxG.collide(level, player);
 		}
