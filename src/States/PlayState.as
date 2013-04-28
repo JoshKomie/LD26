@@ -20,19 +20,24 @@ package States
 		private var player:Player;
 		private var levelData:LevelData = new LevelData();
 		private var level:FlxTilemap;
+		private var buildLayer:FlxTilemap;
 		private var enemyManager:EnemyManager;
 		private var guiManager:GuiManager;
 		private var currentLevel:int;
 		private var currentLevelArray:Array;
+		private var buildArray:Array;
+		private var center:FlxSprite = new FlxSprite();
 		private static var TILE_SIZE:int = 30;
-		public static const DIRT:int = 0;
-		public static const DIRT_ALT:int = 1;
-		public static const GRASS:int = 2;
+		public static const GREY1:int = 0;
+		public static const GREY2:int = 1;
+		public static const GREY3:int = 2;
 		public static const WATER:int = 3;
-		public static const DOOR:int = 4;
-		public static const TREE:int = 5;
-		public static const HOUSE:int = 6;
-		public static const ROCK:int = 7;
+		public static const RED:int = 4;
+		public static const BLUE:int = 5;
+		public static const YELLOW:int = 6;
+		public static const PURPLE:int = 7;
+		public static const GREEN:int = 8;
+		public static const ORANGE:int = 9;
 		[Embed(source = "../../assets/sounds/chop.mp3")]
 		private var Chop:Class;
 		private var chop:Sound;
@@ -45,7 +50,10 @@ package States
 			
 			currentLevel = 1;
 			createMap(currentLevel);
-			FlxG.worldBounds = new FlxRect(0, 0, 5000, 3000);
+			buildArray = createRandomIntArray(5000, 0, 0);
+			buildLayer = new FlxTilemap();
+			buildLayer.loadMap(FlxTilemap.arrayToCSV(buildArray, 100), levelData.levelOneTilemap, TILE_SIZE, TILE_SIZE, FlxTilemap.OFF,0, 1, 5);
+			add(buildLayer);
 			createPlayer();
 			//camera wil follow player
 			FlxG.camera.follow(player);
@@ -104,9 +112,10 @@ package States
 				{
 					for (var l:int = 0; l < numberOfPockets; l++) 
 					{
-						if (Math.abs(j - pocketCenterPoints[l].x) < 4 && Math.abs(k - pocketCenterPoints[l].y) < 4)
+						var size:int = Utils.rollInt(-2, 8);
+						if (Math.abs(j - pocketCenterPoints[l].x) < size && Math.abs(k - pocketCenterPoints[l].y) < size)
 						{
-							var roll:int = Utils.rollInt(0, Math.abs(j - pocketCenterPoints[l].x));
+							var roll:int = Utils.rollInt(0, Math.abs(j - pocketCenterPoints[l].x + 2));
 							if (roll == 0)
 							{
 								level.setTile(j, k, type);
@@ -126,7 +135,7 @@ package States
 		private function createMap(levelNum:int):void
 		{
 			
-			currentLevelArray = createRandomIntArray(5000, DIRT, DIRT_ALT)
+			currentLevelArray = createRandomIntArray(5000, GREY1, GREY2)
 			
 			switch (levelNum)
 			{
@@ -136,23 +145,39 @@ package States
 					add(level);
 					break;
 			}
-			addResources(TREE, 30);
-			addResources(WATER, 8);
-			addResources(ROCK, 3);
-			level.setTileProperties(5, FlxObject.ANY, bump);
-			level.setTileProperties(7, FlxObject.ANY, bump);
+			addResources(BLUE, 8);
+			addResources(WATER, 15);
+			addResources(RED, 8);
+			addResources(YELLOW, 8);
+			level.setTileProperties(RED, FlxObject.ANY, bump);
+			level.setTileProperties(BLUE, FlxObject.ANY, bump);
+			level.setTileProperties(YELLOW, FlxObject.ANY, bump);
 			
 		}
 		
 		/**
 		 * takes away the green tiles and replaces it with brown, adds to player numLogs
 		 */
-		private function chopTree():void
+		private function chopTree(color:int):void
 		{
 			var center:FlxPoint = player.getFrontpoint(TILE_SIZE);
-			var newGround:int = Utils.rollInt(DIRT, DIRT_ALT);
+			var newGround:int = Utils.rollInt(GREY1, GREY2);
+			color = level.getTile(center.x / TILE_SIZE, center.y / TILE_SIZE);
 			level.setTile(center.x / TILE_SIZE, center.y / TILE_SIZE, newGround);
-			player.numLogs += 2;
+			trace(color);
+			switch (color)
+			{
+				case RED:
+					
+					player.amtRed += 1;
+					break;
+				case BLUE:
+					player.amtBlue += 1;
+					break;
+				case YELLOW:
+					player.amtYellow += 1;
+					break
+			}
 		}
 		
 		/*
@@ -173,29 +198,36 @@ package States
 		 */
 		override public function update():void
 		{
-			
+			center.x = player.getMidpoint().x;
+			center.y = player.getMidpoint().y;
+			center.width = 0;
+			center.height = 0;
 			getTileUnder();
-			FlxG.collide(player, level);
-			//trace(player.isOver);
+			FlxG.collide(player, buildLayer);
+			
 			if (FlxG.keys.SPACE)
 			{
-				player.build(player.currentBuildType, player.getMidpoint().x / TILE_SIZE, player.getMidpoint().y / TILE_SIZE, level);
+				player.build(player.currentBuildType, player.getMidpoint().x / TILE_SIZE, player.getMidpoint().y / TILE_SIZE, buildLayer);
 			}
 			super.update();
-			//FlxG.collide(player, level, bump);
+			FlxG.collide(player, level, bump);
+			
 		}
 		
 		private function bump(obj1:FlxObject, obj2:FlxObject):void
 		{
-			
+			//player.width = 1;
+			//player.height = 1;
 			if (obj1 == player || obj2 == player)
 			{
 				if (player.mine())
 				{
-					chopTree();
+					chopTree(level.getTile(center.x / TILE_SIZE, center.y / TILE_SIZE));
 				}
 				FlxG.play(Chop);
 			}
+			//player.width = 10;
+			//player.height = 10;
 			
 		}
 		

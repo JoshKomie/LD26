@@ -13,15 +13,20 @@ package GameObjects
 		private var maxPow:int = 150;
 		private var mineCount:int = 0;
 		public var isOver:int = 0; // what type of tile he is over
-		public var numLogs:int = 0; // number of logs he has
-		public var numStones:int = 0;
-		public var currentBuildType:int = PlayState.HOUSE;
+		
+		public var amtRed:int = 0; // number of logs he has
+		public var amtYellow:int = 0;
+		public var amtBlue:int = 0;
+		
+		public var currentBuildType:int = PlayState.YELLOW;
 		private var currentBuildTypeIndex:int = 0;
 		private var possibleBuildTypes:Vector.<int> = new Vector.<int>;
 		public var buildType:String;
+		public var center:FlxObject = new FlxObject();
 		
-		[Embed(source = "../../assets/graphics/spritesheet.png")]
+		[Embed(source="../../assets/graphics/spritesheet.png")]
 		private var spriteSheet:Class;
+		
 		public function Player(startx:int = 50, starty:int = 50)
 		{
 			loadGraphic(spriteSheet, true, false, 30, 30);
@@ -30,22 +35,23 @@ package GameObjects
 			//this.elasticity = 5;
 			addAnimation("normal", [0], 0, false);
 			play("normal");
-			this.drag.x = 2000;
-			this.drag.y = 2000;
-			this.maxVelocity.x = 1000;
-			this.maxVelocity.y = 1000;
-			width = 10;
-			height = 10;
-			offset.x = 15;
-			offset.y = 15;
-			possibleBuildTypes.push(PlayState.HOUSE, PlayState.DOOR);
+			this.drag.x = 3000;
+			this.drag.y = 3000;
+			this.maxVelocity.x = 800;
+			this.maxVelocity.y = 800;
+			width = 1;
+			height = 1;
+			offset.x = 10;
+			offset.y = 10;
+			possibleBuildTypes.push(PlayState.PURPLE, PlayState.ORANGE, PlayState.GREEN);
 			trace(possibleBuildTypes);
 			currentBuildType = possibleBuildTypes[0];
-			buildType = "House";
+			buildType = "press Q to cycle build types";
 		}
 		
 		override public function update():void
 		{
+			
 			if (FlxG.keys.justReleased("Q"))
 			{
 				changeBuildType();
@@ -70,12 +76,12 @@ package GameObjects
 			move();
 			
 			//updateAnimations();
-				
+			
 			super.update();
 		}
 		
 		private function move():void
-		{	
+		{
 			if (FlxG.keys.LEFT)
 			{
 				if (velocity.x > -maxPow)
@@ -105,7 +111,7 @@ package GameObjects
 				facing = DOWN;
 				this.angle = 180;
 			}
-			
+		
 		}
 		
 		public function getFrontpoint(dist:int):FlxPoint
@@ -122,23 +128,23 @@ package GameObjects
 		}
 		
 		public function frontNormal():FlxPoint
-		{			
+		{
 			var p:FlxPoint = new FlxPoint;
 			p.x = 0;
 			p.y = 0;
-
+			
 			switch (facing)
 			{
-				case UP:
+				case UP: 
 					p.y = -1;
 					break;
-				case DOWN:
+				case DOWN: 
 					p.y = 1;
 					break;
-				case LEFT:
+				case LEFT: 
 					p.x = -1;
 					break;
-				case RIGHT:
+				case RIGHT: 
 					p.x = 1;
 					break;
 			}
@@ -150,16 +156,16 @@ package GameObjects
 		{
 			switch (facing)
 			{
-				case UP:
+				case UP: 
 					velocity.y = 1000;
 					break;
-				case DOWN:
+				case DOWN: 
 					velocity.y = -1000;
 					break;
-				case LEFT:
+				case LEFT: 
 					velocity.x = 1000;
 					break;
-				case RIGHT:
+				case RIGHT: 
 					velocity.x = -1000;
 					break;
 			}
@@ -176,7 +182,7 @@ package GameObjects
 			
 			return false;
 		}
-	
+		
 		private function updateAnimations():void
 		{
 			if (facing == UP && Math.abs(velocity.y) > 0)
@@ -201,27 +207,37 @@ package GameObjects
 		{
 			switch (type)
 			{
-				case PlayState.HOUSE:
-					if (numLogs > 0 && level.getTile(x, y) != type)
+				case PlayState.PURPLE: 
+					if (amtRed > 0 && amtBlue > 0 && level.getTile(x, y) != type)
 					{
-						level.setTile(x, y, PlayState.HOUSE);
-						numLogs--;
+						level.setTile(x, y, PlayState.PURPLE);
+						amtRed--;
+						amtBlue--;
 					}
 					break;
-				case PlayState.DOOR:
-					if (numLogs > 0 && level.getTile(x, y) != type)
+				case PlayState.GREEN: 
+					if (amtYellow > 0 && amtBlue > 0 && level.getTile(x, y) != type)
 					{
-						level.setTile(x, y, PlayState.DOOR);
-						numLogs--;
+						level.setTile(x, y, PlayState.GREEN);
+						amtYellow--;
+						amtBlue--;
 					}
 					break;
-				default:
+				case PlayState.ORANGE: 
+					if (amtRed > 0 && amtYellow > 0 && level.getTile(x, y) != type)
+					{
+						level.setTile(x, y, PlayState.ORANGE);
+						amtRed--;
+						amtYellow--;
+					}
+					break;
+				default: 
 					trace("no such type");
-					
+			
 			}
 		}
 		
-		private function changeBuildType():void 
+		private function changeBuildType():void
 		{
 			currentBuildTypeIndex++;
 			if (currentBuildTypeIndex >= possibleBuildTypes.length)
@@ -231,13 +247,16 @@ package GameObjects
 			currentBuildType = possibleBuildTypes[currentBuildTypeIndex];
 			switch (currentBuildType)
 			{
-				case PlayState.HOUSE:
-					buildType = "House";
+				case PlayState.PURPLE: 
+					buildType = "Purple";
 					break;
-				case PlayState.DOOR:
-					buildType = "Door";
+				case PlayState.ORANGE: 
+					buildType = "Orange";
 					break;
-
+				case PlayState.GREEN: 
+					buildType = "Green";
+					break;
+			
 			}
 		}
 	}
