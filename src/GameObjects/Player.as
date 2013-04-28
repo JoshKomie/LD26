@@ -15,6 +15,10 @@ package GameObjects
 		public var isOver:int = 0; // what type of tile he is over
 		public var numLogs:int = 0; // number of logs he has
 		public var numStones:int = 0;
+		public var currentBuildType:int = PlayState.HOUSE;
+		private var currentBuildTypeIndex:int = 0;
+		private var possibleBuildTypes:Vector.<int> = new Vector.<int>;
+		public var buildType:String;
 		
 		[Embed(source = "../../assets/graphics/spritesheet.png")]
 		private var spriteSheet:Class;
@@ -23,21 +27,29 @@ package GameObjects
 			loadGraphic(spriteSheet, true, false, 30, 30);
 			x = startx;
 			y = starty;
-			this.elasticity = 5;
+			//this.elasticity = 5;
 			addAnimation("normal", [0], 0, false);
 			play("normal");
 			this.drag.x = 2000;
 			this.drag.y = 2000;
 			this.maxVelocity.x = 1000;
 			this.maxVelocity.y = 1000;
-			width = 0;
-			height = 0;
+			width = 10;
+			height = 10;
 			offset.x = 15;
 			offset.y = 15;
+			possibleBuildTypes.push(PlayState.HOUSE, PlayState.DOOR);
+			trace(possibleBuildTypes);
+			currentBuildType = possibleBuildTypes[0];
+			buildType = "House";
 		}
 		
 		override public function update():void
 		{
+			if (FlxG.keys.justReleased("Q"))
+			{
+				changeBuildType();
+			}
 			if (isOver == 3)
 			{
 				drag.x = 300;
@@ -155,6 +167,7 @@ package GameObjects
 		
 		public function mine():Boolean
 		{
+			bounce();
 			if (++mineCount >= 3)
 			{
 				mineCount = 0;
@@ -186,7 +199,46 @@ package GameObjects
 		
 		public function build(type:int, x:int, y:int, level:FlxTilemap):void
 		{
-			//if 
+			switch (type)
+			{
+				case PlayState.HOUSE:
+					if (numLogs > 0 && level.getTile(x, y) != type)
+					{
+						level.setTile(x, y, PlayState.HOUSE);
+						numLogs--;
+					}
+					break;
+				case PlayState.DOOR:
+					if (numLogs > 0 && level.getTile(x, y) != type)
+					{
+						level.setTile(x, y, PlayState.DOOR);
+						numLogs--;
+					}
+					break;
+				default:
+					trace("no such type");
+					
+			}
+		}
+		
+		private function changeBuildType():void 
+		{
+			currentBuildTypeIndex++;
+			if (currentBuildTypeIndex >= possibleBuildTypes.length)
+			{
+				currentBuildTypeIndex = 0;
+			}
+			currentBuildType = possibleBuildTypes[currentBuildTypeIndex];
+			switch (currentBuildType)
+			{
+				case PlayState.HOUSE:
+					buildType = "House";
+					break;
+				case PlayState.DOOR:
+					buildType = "Door";
+					break;
+
+			}
 		}
 	}
 

@@ -29,9 +29,10 @@ package States
 		public static const DIRT_ALT:int = 1;
 		public static const GRASS:int = 2;
 		public static const WATER:int = 3;
-		public static const ROCK:int = 4;
+		public static const DOOR:int = 4;
 		public static const TREE:int = 5;
 		public static const HOUSE:int = 6;
+		public static const ROCK:int = 7;
 		[Embed(source = "../../assets/sounds/chop.mp3")]
 		private var Chop:Class;
 		private var chop:Sound;
@@ -131,13 +132,15 @@ package States
 			{
 				case 1:
 					level = new FlxTilemap();
-					level.loadMap(FlxTilemap.arrayToCSV(currentLevelArray, 100), levelData.levelOneTilemap, TILE_SIZE, TILE_SIZE, FlxTilemap.OFF, 0, 0, 4);
+					level.loadMap(FlxTilemap.arrayToCSV(currentLevelArray, 100), levelData.levelOneTilemap, TILE_SIZE, TILE_SIZE, FlxTilemap.OFF, 0, 0, 5);
 					add(level);
 					break;
 			}
 			addResources(TREE, 30);
 			addResources(WATER, 8);
 			addResources(ROCK, 3);
+			level.setTileProperties(5, FlxObject.ANY, bump);
+			level.setTileProperties(7, FlxObject.ANY, bump);
 			
 		}
 		
@@ -172,22 +175,19 @@ package States
 		{
 			
 			getTileUnder();
-			if (FlxG.keys.SPACE && player.isOver == 3)
-			{
-				chopTree();
-			}
 			FlxG.collide(player, level);
 			//trace(player.isOver);
-			/*if (FlxG.keys.SPACE && player.isOver == 3)
+			if (FlxG.keys.SPACE)
 			{
-				chopTree();
-			}*/
+				player.build(player.currentBuildType, player.getMidpoint().x / TILE_SIZE, player.getMidpoint().y / TILE_SIZE, level);
+			}
 			super.update();
-			FlxG.collide(player, level, bump);
+			//FlxG.collide(player, level, bump);
 		}
 		
 		private function bump(obj1:FlxObject, obj2:FlxObject):void
 		{
+			
 			if (obj1 == player || obj2 == player)
 			{
 				if (player.mine())
@@ -196,6 +196,7 @@ package States
 				}
 				FlxG.play(Chop);
 			}
+			
 		}
 		
 		public function nextLevel():void
